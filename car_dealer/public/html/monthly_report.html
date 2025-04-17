@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Monthly Payment Report</title>
+<style>table, th, td {border: 1px solid black; border-collapse: collapse;} th, td {padding: 10px;}</style>
+</head>
+<body>
+    <h1>Monthly Payment Report</h1>
+    <div id="report"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/monthly-report').then(response => response.json()).then(data => {
+        const reportDiv = document.getElementById('report');
+        if (data.sales && data.sales.length > 0) {
+            const table = document.createElement('table');
+            const headerRow = table.insertRow();
+            ['Sale ID', 'Customer Name', 'Car', 'Total Price', 'Monthly Payment', 'Payments Made'].forEach(header => {
+                const th = document.createElement('th'); th.innerText = header; headerRow.appendChild(th);
+            });
+            data.sales.forEach(sale => {
+                const row = table.insertRow();
+                [sale.sale_id, sale.customer_name, `${sale.car_make} ${sale.car_model}`, `$${sale.total_price}`, `$${sale.monthly_payment_amount}`, sale.payments_made].forEach(text => {
+                    const cell = row.insertCell(); cell.innerText = text;
+                });
+            });
+            reportDiv.appendChild(table);
+            const revenueParagraph = document.createElement('p');
+            revenueParagraph.innerText = `Expected Revenue: $${data.expectedRevenue}`;
+            reportDiv.appendChild(revenueParagraph);
+        } else {
+            reportDiv.innerText = 'No sales data available.';
+        }
+    }).catch(error => {
+        console.error('Error fetching monthly report:', error);
+        document.getElementById('report').innerText = 'Failed to load the report.';
+    });
+});
+</script>
+</body>
+</html>
